@@ -31,7 +31,7 @@ public class NotRetainedPlus extends Fragment {
         synchronized (this) {
           if (mReady) {
             MainActivity activity = (MainActivity)NotRetainedPlus.this.getActivity();
-            if      (ii==1) activity.notifyAboutWork(" at 25%");
+            if      (ii==1) activity.notifyAboutWork(" at 1%");
             else if (ii==63)  activity.notifyAboutWork(" at 25%");
             else if (ii==213) activity.notifyAboutWork(" at 75%");
             else if (ii==250) activity.notifyAboutWork(" at 100%");
@@ -51,20 +51,19 @@ public class NotRetainedPlus extends Fragment {
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    log("onCreate-begin()");
+    log("onCreate()");
     setRetainInstance(false);
     mThread.start();
-    log("onCreate-end()");
   }
 
   @Override
   public void onActivityCreated (Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
+    log("onActivityCreated()");
     synchronized (mThread) {
       mReady = true;
       mThread.notify();
     }
-    log("onActivityCreated()");
   }
 
   @Override
@@ -107,10 +106,8 @@ public class NotRetainedPlus extends Fragment {
     super.onDetach();
   }
 
-
-
   private void log (String where) {
-    Log.i("ATAG", "NotRetained" + " - " + Thread.currentThread().getName() + " " + where);
+    Log.i("ATAG", "NotRetained" + " - " + Thread.currentThread().getName() + "Thread " + where);
   }
 
 }

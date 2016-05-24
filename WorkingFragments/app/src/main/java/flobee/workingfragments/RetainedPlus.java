@@ -8,35 +8,34 @@ import android.util.Log;
 public class RetainedPlus extends Fragment {
 
   boolean mReady   = false;
-
+  boolean mQuitting = false;
   final Thread mThread = new Thread() {
     @Override
     public void run () {
-      synchronized (this) {
-        while (!mReady) {
-          try {
-            wait();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
+      for (int ii=0; ii<251; ii++) {
+        synchronized (this) {
+          while (!mReady && !mQuitting) {
+            try {
+              wait();
+            }
+            catch (InterruptedException e){
+              e.printStackTrace();
+            }
           }
-        }
-      } //end synchronization
-      for (int ii=0; ii<=251; ii++) {
+          if (mQuitting)
+            return;
+          Log.i("ATAG", "Retained ii: " + ii + " "+ Thread.currentThread().getName());
+          MainActivity activity = (MainActivity)RetainedPlus.this.getActivity();
+          if      (ii==1)  activity.notifyAboutWork(" at 1%");
+          else if (ii==63)  activity.notifyAboutWork(" at 25%");
+          else if (ii==213) activity.notifyAboutWork(" at 75%");
+          else if (ii==250) activity.notifyAboutWork(" at 100%");
+        }//end sync
         try {
           this.sleep(20l);
         }catch (InterruptedException e) {
           e.printStackTrace();
         }
-        Log.i("ATAG", "Retained ii: " + ii + " "+ Thread.currentThread().getName());
-        synchronized (this) {
-          if (mReady) {
-            MainActivity activity = (MainActivity)RetainedPlus.this.getActivity();
-            if      (ii==1)  activity.notifyAboutWork(" at 1%");
-            else if (ii==63)  activity.notifyAboutWork(" at 25%");
-            else if (ii==213) activity.notifyAboutWork(" at 75%");
-            else if (ii==250) activity.notifyAboutWork(" at 100%");
-          }
-        } //end synchronization
       }
     }
   };
@@ -45,29 +44,26 @@ public class RetainedPlus extends Fragment {
   @Override
   public void onAttach (Context context) {
     super.onAttach(context);
-    log("onAttach");
+    log("onAttach()");
   }
 
-  // IMPORTANT
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    log("onCreate-begin()");
+    log("onCreate()");
     setRetainInstance(true);
     mThread.start();
-    log("onCreate-end()");
   }
 
-  // IMPORTANT
   @Override
   public void onActivityCreated (Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    log("onActivityCreated-begin()");
+    log("onActivityCreated()");
     synchronized (mThread) {
       mReady = true;
       mThread.notify();
     }
-    log("onActivityCreated-end()");
+
   }
 
   @Override
@@ -96,13 +92,13 @@ public class RetainedPlus extends Fragment {
 
   @Override
   public void onDestroy() {
-    log("onDestroy-begin()");
+    log("onDestroy()");
     synchronized (mThread) {
       mReady = false;
+      mQuitting = true;
       mThread.notify();
     }
     super.onDestroy();
-    log("onDestroy-end()");
   }
 
   // IMPORTANT
@@ -113,7 +109,7 @@ public class RetainedPlus extends Fragment {
   }
 
   private void log (String where) {
-    Log.i("ATAG", "Retained" + " - " + Thread.currentThread().getName() + " " + where);
+    Log.i("ATAG", "Retained" + " - " + Thread.currentThread().getName() + "Thread " + where);
   }
 
 }

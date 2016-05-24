@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public void stopFragment (View view) {
+    log("stopFragment() begin");
     FragmentManager fm = getSupportFragmentManager();
     MusicalFragment frag = (MusicalFragment) fm.findFragmentByTag("work");
     if (frag != null)
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onStart() {
     super.onStart();
-    log("onStart");
+    log("onStart()");
   }
 
   @Override
